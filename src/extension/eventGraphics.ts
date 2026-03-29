@@ -16,7 +16,10 @@ function calcRankings(
   const sorted = [...rows].sort((a, b) => {
     const aScore = useRedEgg ? a.redEgg : a.goldenEgg;
     const bScore = useRedEgg ? b.redEgg : b.goldenEgg;
-    return isAscending ? aScore - bScore : bScore - aScore;
+    const primary = isAscending ? aScore - bScore : bScore - aScore;
+    if (primary !== 0 || useRedEgg) return primary;
+    // 金イクラ同数の場合は赤イクラ降順で決定
+    return b.redEgg - a.redEgg;
   });
 
   return sorted.slice(0, 3).map((row, i) => ({
@@ -39,7 +42,7 @@ export function eventGraphics(nodecg: NodeCG) {
   // __dirname = bundle/extension/ → 1つ上がバンドルルート
   const bundlePath = resolve(__dirname, '..');
 
-  let csvData: CsvData;
+  let csvData: CsvData | undefined;
 
   function loadAndSync() {
     csvData = loadCsvData(bundlePath);
@@ -51,32 +54,22 @@ export function eventGraphics(nodecg: NodeCG) {
       `${csvData.scenarioList.length} scenarios, ` +
       `${csvData.aggregation.length} aggregation rows`
     );
+    for (const w of csvData.warnings) {
+      log.warn(w);
+    }
   }
 
-  loadAndSync();
-
-  nodecg.listenFor('setPlayerScreen', (payload, ack) => {
-    const { rowIndex } = payload;
-    const row = csvData.broadcastSchedule[rowIndex];
-    if (!row) {
-      if (ack && !ack.handled) ack(null, { success: false, error: `Row ${rowIndex} not found` });
-      return;
-    }
-    const scenario = csvData.scenarioList.find((s) => s.scenarioNumber === row.scenarioNumber);
-    const overrideName = row.scenarioNumber != null
-      ? csvData.broadcastDisplayNames[row.scenarioNumber]
-      : undefined;
-    const displayTeamName = overrideName ?? row.teamName;
-    playerScreenRep.value = {
-      teamName: displayTeamName,
-      players: [...row.players] as [string, string, string, string],
-      rule: row.rule,
-    };
-    log.info(`Player screen set to: ${row.teamName}`);
-    if (ack && !ack.handled) ack(null, { success: true });
-  });
+  try {
+    loadAndSync();
+  } catch (err) {
+    log.error('Failed to load CSV on startup:', err);
+  }
 
   nodecg.listenFor('setResultScreen', (payload, ack) => {
+    if (!csvData) {
+      if (ack && !ack.handled) ack(null, { success: false, error: 'CSV not loaded' });
+      return;
+    }
     const { scenarioNumber } = payload;
     const scenario = csvData.scenarioList.find((s) => s.scenarioNumber === scenarioNumber);
     if (!scenario) {

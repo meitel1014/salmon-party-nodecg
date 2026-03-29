@@ -22,16 +22,17 @@ export function App() {
 
   const useRedEgg = currentScenario?.rule === 'ローポイント' || currentScenario?.rule === '赤乱獲';
   const isAscending = currentScenario?.rule === 'ローポイント';
-  const scoreLabel = useRedEgg ? '赤イクラ' : '金イクラ';
 
   const allRankings = useMemo(() => {
     if (!aggregationData || resultScenarioNumber === undefined) return [];
     return [...aggregationData]
       .filter((r) => r.scenarioNumber === resultScenarioNumber)
       .sort((a, b) => {
-        const as = useRedEgg ? a.redEgg : a.goldenEgg;
-        const bs = useRedEgg ? b.redEgg : b.goldenEgg;
-        return isAscending ? as - bs : bs - as;
+        const aScore = useRedEgg ? a.redEgg : a.goldenEgg;
+        const bScore = useRedEgg ? b.redEgg : b.goldenEgg;
+        const primary = isAscending ? aScore - bScore : bScore - aScore;
+        if (primary !== 0 || useRedEgg) return primary;
+        return b.redEgg - a.redEgg;
       });
   }, [aggregationData, resultScenarioNumber, useRedEgg, isAscending]);
 
@@ -81,7 +82,8 @@ export function App() {
               <tr>
                 <th>順位</th>
                 <th>チーム名</th>
-                <th>{scoreLabel}</th>
+                <th className="egg-col">金イクラ</th>
+                <th className="egg-col">赤イクラ</th>
               </tr>
             </thead>
             <tbody>
@@ -89,7 +91,8 @@ export function App() {
                 <tr key={r.teamName}>
                   <td>{idx + 1}</td>
                   <td>{r.teamName}</td>
-                  <td>{(useRedEgg ? r.redEgg : r.goldenEgg).toLocaleString()}</td>
+                  <td className="egg-col">{r.goldenEgg}</td>
+                  <td className="egg-col">{r.redEgg}</td>
                 </tr>
               ))}
             </tbody>

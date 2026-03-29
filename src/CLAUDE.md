@@ -45,7 +45,6 @@ src/
 
 | 名前 | payload | 処理 |
 |---|---|---|
-| `setPlayerScreen` | `{ rowIndex: number }` | `broadcastSchedule[rowIndex]` を `playerScreen` に反映。`displayTeamName` を使用 |
 | `setPlayerScreenDirect` | `{ teamName, players, rule }` | 渡された値をそのまま `playerScreen` に反映（player-info「適用」ボタン用） |
 | `setResultScreen` | `{ scenarioNumber: number }` | ランキング計算して `resultScreen` に反映 |
 | `reloadCsvData` | なし | CSV を再読み込みして全 Replicant を再同期 |

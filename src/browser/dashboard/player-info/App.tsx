@@ -12,12 +12,16 @@ export function App() {
   const [status, setStatus] = useState('');
 
   const prevRowIndexRef = useRef<number | undefined>(undefined);
+  const prevScheduleRef = useRef<typeof broadcastSchedule>(undefined);
 
-  // 選択チームが変わったらフォームを上書き
+  // 選択チームが変わった、またはCSVリロードでbroadcastScheduleが更新されたらフォームを上書き
   useEffect(() => {
     if (selectedRowIndex === undefined || selectedRowIndex === -1) return;
-    if (prevRowIndexRef.current === selectedRowIndex) return;
+    const rowChanged = prevRowIndexRef.current !== selectedRowIndex;
+    const scheduleChanged = prevScheduleRef.current !== broadcastSchedule;
+    if (!rowChanged && !scheduleChanged) return;
     prevRowIndexRef.current = selectedRowIndex;
+    prevScheduleRef.current = broadcastSchedule;
 
     const row = broadcastSchedule?.[selectedRowIndex];
     if (!row) return;
@@ -77,7 +81,11 @@ export function App() {
         </div>
       </div>
 
-      <button className="apply-button" onClick={handleApply}>
+      <button
+        className="apply-button"
+        onClick={handleApply}
+        disabled={selectedRowIndex === undefined || selectedRowIndex === -1}
+      >
         適用
       </button>
       <span className="status">{status}</span>

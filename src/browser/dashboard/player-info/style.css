@@ -65,6 +65,11 @@
   width: 100%;
 }
 
+.apply-button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
 .status {
   font-size: 14px;
   color: #888888;
