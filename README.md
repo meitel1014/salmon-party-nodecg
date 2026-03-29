@@ -3,14 +3,12 @@
 Splatoon 3 サーモンラン大会「Salmon Party！」向けの NodeCG 配信グラフィックシステムです。
 プレイヤー名オーバーレイと結果発表画面を、ダッシュボードから操作できます。
 
----
 
 ## 必要環境
 
 - Node.js v22 以上
 - pnpm（`corepack enable` で有効化）
 
----
 
 ## セットアップ
 
@@ -22,7 +20,6 @@ npx nodecg start
 
 ブラウザで http://localhost:9090 を開くとダッシュボードにアクセスできます。
 
----
 
 ## 大会前の準備：CSVファイルの編集
 
@@ -46,7 +43,6 @@ npx nodecg start
 
 CSV 編集後は、ダッシュボードの **設定 → CSV リロード** パネルからデータを再読み込みできます。
 
----
 
 ## 配信中の操作
 
@@ -66,4 +62,8 @@ CSV 編集後は、ダッシュボードの **設定 → CSV リロード** パ�
 2. **結果発表** パネルで ← → ボタンを押してシナリオを選択
 3. ランキングを確認し、「**適用**」ボタンを押す → Graphic が更新される
 
----
+## ライセンス
+
+このプロジェクトは MIT ライセンスのもとで公開されています。
+
+本コードは [bozitoma/nodecg-template-with-vite](https://github.com/bozitoma/nodecg-template-with-vite)（MIT License, Copyright (c) 2026 bozitoma）をベースに作成しています。
