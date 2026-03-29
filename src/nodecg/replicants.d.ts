@@ -15,4 +15,5 @@ export type ReplicantMap = {
   broadcastSchedule: BroadcastSchedule;
   scenarioList: ScenarioList;
   aggregationData: AggregationData;
+  selectedPlayerRowIndex: number;
 };

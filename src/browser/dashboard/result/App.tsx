@@ -6,24 +6,26 @@ export function App() {
   const [scenarioList] = useReplicant('scenarioList');
   const [aggregationData] = useReplicant('aggregationData');
 
-  const [resultScenarioNumber, setResultScenarioNumber] = useState<number>(1);
+  const [scenarioIdx, setScenarioIdx] = useState(0);
   const [resultStatus, setResultStatus] = useState('');
-  const resultInitRef = useRef(false);
+  const initRef = useRef(false);
 
   useEffect(() => {
-    if (!scenarioList || resultInitRef.current) return;
-    resultInitRef.current = true;
-    const first = scenarioList[0]?.scenarioNumber;
-    if (first !== undefined) setResultScenarioNumber(first);
+    if (!scenarioList || initRef.current) return;
+    initRef.current = true;
+    setScenarioIdx(0);
   }, [scenarioList]);
 
-  const resultScenario = scenarioList?.find((s) => s.scenarioNumber === resultScenarioNumber);
-  const useRedEgg = resultScenario?.rule === 'ローポイント' || resultScenario?.rule === '赤乱獲';
-  const isAscending = resultScenario?.rule === 'ローポイント';
+  const scenarioCount = scenarioList?.length ?? 0;
+  const currentScenario = scenarioList?.[scenarioIdx];
+  const resultScenarioNumber = currentScenario?.scenarioNumber;
+
+  const useRedEgg = currentScenario?.rule === 'ローポイント' || currentScenario?.rule === '赤乱獲';
+  const isAscending = currentScenario?.rule === 'ローポイント';
   const scoreLabel = useRedEgg ? '赤イクラ' : '金イクラ';
 
   const allRankings = useMemo(() => {
-    if (!aggregationData) return [];
+    if (!aggregationData || resultScenarioNumber === undefined) return [];
     return [...aggregationData]
       .filter((r) => r.scenarioNumber === resultScenarioNumber)
       .sort((a, b) => {
@@ -34,10 +36,11 @@ export function App() {
   }, [aggregationData, resultScenarioNumber, useRedEgg, isAscending]);
 
   const handleApplyResult = async () => {
+    if (resultScenarioNumber === undefined) return;
     try {
       setResultStatus('適用中...');
       await nodecg.sendMessage('setResultScreen', { scenarioNumber: resultScenarioNumber });
-      setResultStatus(resultScenario ? `✓ ${resultScenario.displayName}` : '✓ 適用しました');
+      setResultStatus(currentScenario ? `✓ ${currentScenario.displayName}` : '✓ 適用しました');
     } catch (err) {
       setResultStatus(`エラー: ${(err as Error).message}`);
     }
@@ -46,18 +49,26 @@ export function App() {
   return (
     <div className="container">
       <div className="section">
-        <div className="row">
-          <select
-            className="select"
-            value={resultScenarioNumber}
-            onChange={(e) => setResultScenarioNumber(Number(e.target.value))}
+        <div className="scenario-nav">
+          <button
+            className="nav-btn"
+            onClick={() => setScenarioIdx((i) => Math.max(0, i - 1))}
+            disabled={scenarioIdx === 0}
           >
-            {scenarioList?.map((s) => (
-              <option key={s.scenarioNumber} value={s.scenarioNumber}>
-                {s.displayName}（{s.rule}）
-              </option>
-            )) ?? <option>読み込み中...</option>}
-          </select>
+            ←
+          </button>
+          <span className="scenario-label">
+            {currentScenario
+              ? `${currentScenario.displayName}（${currentScenario.rule}）`
+              : '読み込み中...'}
+          </span>
+          <button
+            className="nav-btn"
+            onClick={() => setScenarioIdx((i) => Math.min(scenarioCount - 1, i + 1))}
+            disabled={scenarioIdx >= scenarioCount - 1}
+          >
+            →
+          </button>
           <button className="apply-button" onClick={handleApplyResult}>
             適用
           </button>

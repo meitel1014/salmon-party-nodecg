@@ -34,6 +34,7 @@ export function eventGraphics(nodecg: NodeCG) {
   const broadcastScheduleRep = nodecg.Replicant('broadcastSchedule');
   const scenarioListRep = nodecg.Replicant('scenarioList');
   const aggregationDataRep = nodecg.Replicant('aggregationData');
+  nodecg.Replicant('selectedPlayerRowIndex', { defaultValue: -1 });
 
   // __dirname = bundle/extension/ → 1つ上がバンドルルート
   const bundlePath = resolve(__dirname, '..');
@@ -84,6 +85,16 @@ export function eventGraphics(nodecg: NodeCG) {
       rankings,
     };
     log.info(`Result screen set to: ${scenario.displayName} (${scenario.rule}), ${rankings.length} teams ranked`);
+    if (ack && !ack.handled) ack(null, { success: true });
+  });
+
+  nodecg.listenFor('setPlayerScreenDirect', (payload, ack) => {
+    playerScreenRep.value = {
+      teamName: payload.teamName,
+      players: payload.players,
+      rule: payload.rule,
+    };
+    log.info(`Player screen set directly: ${payload.teamName}`);
     if (ack && !ack.handled) ack(null, { success: true });
   });
 

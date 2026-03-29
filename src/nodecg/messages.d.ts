@@ -13,4 +13,8 @@ export type MessageMap = {
   reloadCsvData: {
     result: { success: boolean; error?: string };
   };
+  setPlayerScreenDirect: {
+    data: { teamName: string; players: [string, string, string, string]; rule: string };
+    result: { success: boolean; error?: string };
+  };
 };

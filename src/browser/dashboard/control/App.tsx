@@ -5,6 +5,7 @@ import './style.css';
 export function App() {
   const [broadcastSchedule] = useReplicant('broadcastSchedule');
   const [scenarioList] = useReplicant('scenarioList');
+  const [, setSelectedPlayerRowIndex] = useReplicant('selectedPlayerRowIndex');
 
   const [playerScenarioIdx, setPlayerScenarioIdx] = useState(0);
   const [playerRowIndex, setPlayerRowIndex] = useState(-1);
@@ -25,6 +26,7 @@ export function App() {
       (r) => r.scenarioNumber === scenario.scenarioNumber && r.players.some((p) => p !== '')
     );
     setPlayerRowIndex(found);
+    setSelectedPlayerRowIndex(found);
   }, [playerScenarioIdx, scenarioList, broadcastSchedule]);
 
   const currentScenario = scenarioList?.[playerScenarioIdx];
@@ -93,7 +95,11 @@ export function App() {
             <select
               className="select"
               value={playerRowIndex}
-              onChange={(e) => setPlayerRowIndex(Number(e.target.value))}
+              onChange={(e) => {
+                const idx = Number(e.target.value);
+                setPlayerRowIndex(idx);
+                setSelectedPlayerRowIndex(idx);
+              }}
             >
               {selectableTeams.map(({ i, row }) => (
                 <option key={i} value={i}>
