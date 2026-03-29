@@ -30,11 +30,6 @@
   outline: none;
 }
 
-.apply-button:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-
 .apply-button {
   padding: 8px 16px;
   background: #ffffff;
@@ -45,12 +40,58 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: background 0.15s;
+  position: relative;
+  overflow: hidden;
 }
 
-.status {
-  font-size: 14px;
-  color: #888888;
-  min-height: 16px;
+.apply-button:hover:not(:disabled) {
+  background: #dddddd;
+}
+
+.apply-button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.apply-button--pending {
+  background: #888888;
+}
+
+.apply-button--success {
+  animation: flash-success 1.5s ease forwards;
+}
+
+.apply-button--error {
+  animation: flash-error 1.5s ease forwards;
+}
+
+.apply-button .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(0);
+  animation: ripple-expand 1s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple-expand {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes flash-success {
+  0%   { background: #2ecc71; }
+  20%  { background: #2ecc71; }
+  100% { background: #ffffff; }
+}
+
+@keyframes flash-error {
+  0%   { background: #e74c3c; }
+  20%  { background: #e74c3c; }
+  100% { background: #ffffff; }
 }
 
 

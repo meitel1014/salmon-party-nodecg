@@ -31,7 +31,17 @@ export function App() {
     setRule(row.rule);
   }, [selectedRowIndex, broadcastSchedule]);
 
-  const handleApply = async () => {
+  const handleApply = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    // リップルエフェクト
+    const btn = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px`;
+    btn.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+
     if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     try {
       setApplyState('pending');

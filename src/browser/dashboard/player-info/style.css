@@ -63,7 +63,13 @@
   font-weight: 600;
   cursor: pointer;
   width: 100%;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.apply-button:hover:not(:disabled) {
+  background: #dddddd;
 }
 
 .apply-button:disabled {
@@ -73,29 +79,40 @@
 
 .apply-button--pending {
   background: #888888;
-  color: #ffffff;
+}
+
+.apply-button .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(0);
+  animation: ripple-expand 1s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple-expand {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
 
 .apply-button--success {
-  background: #2ecc71;
-  color: #ffffff;
   animation: flash-success 1.5s ease forwards;
 }
 
 .apply-button--error {
-  background: #e74c3c;
-  color: #ffffff;
   animation: flash-error 1.5s ease forwards;
 }
 
 @keyframes flash-success {
   0%   { background: #2ecc71; }
-  70%  { background: #2ecc71; }
-  100% { background: #ffffff; color: #000000; }
+  20%  { background: #2ecc71; }
+  100% { background: #ffffff; }
 }
 
 @keyframes flash-error {
   0%   { background: #e74c3c; }
-  70%  { background: #e74c3c; }
-  100% { background: #ffffff; color: #000000; }
+  20%  { background: #e74c3c; }
+  100% { background: #ffffff; }
 }

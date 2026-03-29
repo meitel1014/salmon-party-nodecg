@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import { sortByRanking } from '../../../ranking';
 import { ScenarioNav } from '../components/ScenarioNav';
@@ -9,7 +9,8 @@ export function App() {
   const [aggregationData] = useReplicant('aggregationData');
 
   const [scenarioNumber, setScenarioNumber] = useState<number | null>(null);
-  const [resultStatus, setResultStatus] = useState('');
+  const [applyState, setApplyState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // scenarioList がロードされたら最初のシナリオを選択
   useEffect(() => {
@@ -26,15 +27,27 @@ export function App() {
     return sortByRanking(rows, currentScenario.rule);
   }, [aggregationData, scenarioNumber, currentScenario]);
 
-  const handleApplyResult = async () => {
+  const handleApplyResult = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (scenarioNumber === null) return;
+
+    const btn = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px`;
+    btn.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     try {
-      setResultStatus('適用中...');
+      setApplyState('pending');
       await nodecg.sendMessage('setResultScreen', { scenarioNumber });
-      setResultStatus(currentScenario ? `✓ ${currentScenario.displayName}` : '✓ 適用しました');
-    } catch (err) {
-      setResultStatus(`エラー: ${(err as Error).message}`);
+      setApplyState('success');
+    } catch {
+      setApplyState('error');
     }
+    resetTimerRef.current = setTimeout(() => setApplyState('idle'), 1500);
   };
 
   return (
@@ -46,14 +59,13 @@ export function App() {
           onScenarioChange={setScenarioNumber}
         >
           <button
-            className="apply-button"
+            className={`apply-button apply-button--${applyState}`}
             onClick={handleApplyResult}
-            disabled={scenarioNumber === null}
+            disabled={scenarioNumber === null || applyState === 'pending'}
           >
             適用
           </button>
         </ScenarioNav>
-        <span className="status">{resultStatus}</span>
 
         {allRankings.length > 0 ? (
           <table className="rankings-table">
