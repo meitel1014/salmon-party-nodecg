@@ -16,10 +16,17 @@
     "dashboardPanels": [
       {
         "name": "control",
-        "title": "Control",
+        "title": "プレイヤー画面",
         "file": "control.html",
         "width": 4,
-        "workspace": "Event"
+        "workspace": "プレイヤー"
+      },
+      {
+        "name": "result",
+        "title": "結果発表",
+        "file": "result.html",
+        "width": 4,
+        "workspace": "結果発表"
       }
     ],
     "graphics": [

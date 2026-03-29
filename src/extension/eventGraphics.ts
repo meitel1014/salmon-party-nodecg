@@ -11,18 +11,18 @@ function calcRankings(
   const rows = aggregation.filter((r) => r.scenarioNumber === scenarioNumber);
 
   const isAscending = rule === 'ローポイント';
-  const useRedSalmon = rule === 'ローポイント' || rule === '赤乱獲';
+  const useRedEgg = rule === 'ローポイント' || rule === '赤乱獲';
 
   const sorted = [...rows].sort((a, b) => {
-    const aScore = useRedSalmon ? a.redSalmon : a.goldSalmon;
-    const bScore = useRedSalmon ? b.redSalmon : b.goldSalmon;
+    const aScore = useRedEgg ? a.redEgg : a.goldenEgg;
+    const bScore = useRedEgg ? b.redEgg : b.goldenEgg;
     return isAscending ? aScore - bScore : bScore - aScore;
   });
 
   return sorted.slice(0, 3).map((row, i) => ({
     rank: i + 1,
     teamName: row.teamName,
-    score: useRedSalmon ? row.redSalmon : row.goldSalmon,
+    score: useRedEgg ? row.redEgg : row.goldenEgg,
   }));
 }
 
@@ -33,6 +33,7 @@ export function eventGraphics(nodecg: NodeCG) {
   const resultScreenRep = nodecg.Replicant('resultScreen');
   const broadcastScheduleRep = nodecg.Replicant('broadcastSchedule');
   const scenarioListRep = nodecg.Replicant('scenarioList');
+  const aggregationDataRep = nodecg.Replicant('aggregationData');
 
   // __dirname = bundle/extension/ → 1つ上がバンドルルート
   const bundlePath = resolve(__dirname, '..');
@@ -43,6 +44,7 @@ export function eventGraphics(nodecg: NodeCG) {
     csvData = loadCsvData(bundlePath);
     broadcastScheduleRep.value = csvData.broadcastSchedule;
     scenarioListRep.value = csvData.scenarioList;
+    aggregationDataRep.value = csvData.aggregation;
     log.info(
       `CSV loaded: ${csvData.broadcastSchedule.length} broadcast rows, ` +
       `${csvData.scenarioList.length} scenarios, ` +

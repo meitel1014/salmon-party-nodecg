@@ -3,6 +3,7 @@ import type {
   ResultScreen,
   BroadcastSchedule,
   ScenarioList,
+  AggregationData,
 } from '../schemas';
 
 /**
@@ -13,4 +14,5 @@ export type ReplicantMap = {
   resultScreen: ResultScreen;
   broadcastSchedule: BroadcastSchedule;
   scenarioList: ScenarioList;
+  aggregationData: AggregationData;
 };

@@ -19,8 +19,8 @@ export interface CsvData {
 export interface AggregationRow {
   teamName: string;
   scenarioNumber: number;
-  goldSalmon: number;
-  redSalmon: number;
+  goldenEgg: number;
+  redEgg: number;
 }
 
 export function loadCsvData(bundlePath: string): CsvData {
@@ -59,8 +59,8 @@ export function loadCsvData(bundlePath: string): CsvData {
     .map((row) => ({
       teamName: row[4].trim(),
       scenarioNumber: Number(row[5].trim()),
-      goldSalmon: Number(row[6].trim()) || 0,
-      redSalmon: Number(row[7].trim()) || 0,
+      goldenEgg: Number(row[6].trim()) || 0,
+      redEgg: Number(row[7].trim()) || 0,
     }));
 
   return { broadcastSchedule, scenarioList, aggregation };

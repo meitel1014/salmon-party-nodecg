@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import './style.css';
 
@@ -6,12 +6,42 @@ export function App() {
   const [broadcastSchedule] = useReplicant('broadcastSchedule');
   const [scenarioList] = useReplicant('scenarioList');
 
-  const [playerRowIndex, setPlayerRowIndex] = useState(0);
-  const [resultScenarioNumber, setResultScenarioNumber] = useState<number>(1);
+  const [playerScenarioIdx, setPlayerScenarioIdx] = useState(0);
+  const [playerRowIndex, setPlayerRowIndex] = useState(-1);
   const [playerStatus, setPlayerStatus] = useState('');
-  const [resultStatus, setResultStatus] = useState('');
+
+  const prevPlayerScenarioIdxRef = useRef<number | null>(null);
+
+  // シナリオが変わったときチームを自動選択
+  useEffect(() => {
+    if (!scenarioList || !broadcastSchedule) return;
+    if (prevPlayerScenarioIdxRef.current === playerScenarioIdx) return;
+    prevPlayerScenarioIdxRef.current = playerScenarioIdx;
+
+    const scenario = scenarioList[playerScenarioIdx];
+    if (!scenario) return;
+
+    const found = broadcastSchedule.findIndex(
+      (r) => r.scenarioNumber === scenario.scenarioNumber && r.players.some((p) => p !== '')
+    );
+    setPlayerRowIndex(found);
+  }, [playerScenarioIdx, scenarioList, broadcastSchedule]);
+
+  const currentScenario = scenarioList?.[playerScenarioIdx];
+  const scenarioCount = scenarioList?.length ?? 0;
+
+  // プレイヤー情報があるチームのみ選択可能
+  const selectableTeams = useMemo(
+    () =>
+      (broadcastSchedule ?? []).flatMap((row, i) =>
+        row.players.some((p) => p !== '') ? [{ i, row }] : []
+      ),
+    [broadcastSchedule]
+  );
+  const hasTeamInfo = playerRowIndex !== -1;
 
   const handleApplyPlayer = async () => {
+    if (!hasTeamInfo) return;
     try {
       setPlayerStatus('適用中...');
       await nodecg.sendMessage('setPlayerScreen', { rowIndex: playerRowIndex });
@@ -22,22 +52,10 @@ export function App() {
     }
   };
 
-  const handleApplyResult = async () => {
-    try {
-      setResultStatus('適用中...');
-      await nodecg.sendMessage('setResultScreen', { scenarioNumber: resultScenarioNumber });
-      const scenario = scenarioList?.find((s) => s.scenarioNumber === resultScenarioNumber);
-      setResultStatus(scenario ? `✓ ${scenario.displayName}` : '✓ 適用しました');
-    } catch (err) {
-      setResultStatus(`エラー: ${(err as Error).message}`);
-    }
-  };
-
   const handleReload = async () => {
     try {
       await nodecg.sendMessage('reloadCsvData');
       setPlayerStatus('');
-      setResultStatus('');
     } catch (err) {
       console.error('Reload failed:', err);
     }
@@ -45,54 +63,61 @@ export function App() {
 
   return (
     <div className="container">
-      {/* プレイヤー画面 */}
       <div className="section">
-        <span className="section-title">プレイヤー画面</span>
-        <div className="row">
-          <select
-            className="select"
-            value={playerRowIndex}
-            onChange={(e) => setPlayerRowIndex(Number(e.target.value))}
+        <span className="section-title">シナリオ</span>
+        <div className="scenario-nav">
+          <button
+            className="nav-btn"
+            onClick={() => setPlayerScenarioIdx((i) => Math.max(0, i - 1))}
+            disabled={playerScenarioIdx === 0}
           >
-            {broadcastSchedule?.map((row, i) => (
-              <option key={i} value={i}>
-                {row.teamName} ({row.rule})
-              </option>
-            )) ?? <option>読み込み中...</option>}
-          </select>
-          <button className="apply-button" onClick={handleApplyPlayer}>
-            適用
+            ←
+          </button>
+          <span className="scenario-label">
+            {currentScenario
+              ? `${currentScenario.displayName}（${currentScenario.rule}）`
+              : '読み込み中...'}
+          </span>
+          <button
+            className="nav-btn"
+            onClick={() => setPlayerScenarioIdx((i) => Math.min(scenarioCount - 1, i + 1))}
+            disabled={playerScenarioIdx >= scenarioCount - 1}
+          >
+            →
           </button>
         </div>
+
+        <span className="section-title">チーム</span>
+        {hasTeamInfo ? (
+          <div className="row">
+            <select
+              className="select"
+              value={playerRowIndex}
+              onChange={(e) => setPlayerRowIndex(Number(e.target.value))}
+            >
+              {selectableTeams.map(({ i, row }) => (
+                <option key={i} value={i}>
+                  {row.teamName}
+                  {row.scenarioNumber !== null ? ` (S${row.scenarioNumber})` : ''}
+                </option>
+              ))}
+            </select>
+            <button className="apply-button" onClick={handleApplyPlayer}>
+              適用
+            </button>
+          </div>
+        ) : (
+          <div className="row">
+            <span className="no-team">チーム情報なし</span>
+            <button className="apply-button" disabled>
+              適用
+            </button>
+          </div>
+        )}
         <span className="status">{playerStatus}</span>
       </div>
 
       <hr className="divider" />
-
-      {/* 結果発表 */}
-      <div className="section">
-        <span className="section-title">結果発表</span>
-        <div className="row">
-          <select
-            className="select"
-            value={resultScenarioNumber}
-            onChange={(e) => setResultScenarioNumber(Number(e.target.value))}
-          >
-            {scenarioList?.map((s) => (
-              <option key={s.scenarioNumber} value={s.scenarioNumber}>
-                {s.displayName} ({s.rule})
-              </option>
-            )) ?? <option>読み込み中...</option>}
-          </select>
-          <button className="apply-button" onClick={handleApplyResult}>
-            適用
-          </button>
-        </div>
-        <span className="status">{resultStatus}</span>
-      </div>
-
-      <hr className="divider" />
-
       <button className="reload-button" onClick={handleReload}>
         CSV リロード
       </button>
