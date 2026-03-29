@@ -2,6 +2,8 @@ import { resolve } from 'path';
 import type { NodeCG } from './nodecg';
 import { loadCsvData, type CsvData } from './csvLoader';
 import type { ResultScreen } from '../schemas';
+import { sortByRanking } from '../ranking';
+import { usesRedEgg } from '../rules';
 
 function calcRankings(
   aggregation: CsvData['aggregation'],
@@ -9,23 +11,11 @@ function calcRankings(
   rule: string
 ): ResultScreen['rankings'] {
   const rows = aggregation.filter((r) => r.scenarioNumber === scenarioNumber);
-
-  const isAscending = rule === 'ローポイント';
-  const useRedEgg = rule === 'ローポイント' || rule === '赤乱獲';
-
-  const sorted = [...rows].sort((a, b) => {
-    const aScore = useRedEgg ? a.redEgg : a.goldenEgg;
-    const bScore = useRedEgg ? b.redEgg : b.goldenEgg;
-    const primary = isAscending ? aScore - bScore : bScore - aScore;
-    if (primary !== 0 || useRedEgg) return primary;
-    // 金イクラ同数の場合は赤イクラ降順で決定
-    return b.redEgg - a.redEgg;
-  });
-
-  return sorted.slice(0, 3).map((row, i) => ({
+  const redEgg = usesRedEgg(rule);
+  return sortByRanking(rows, rule).slice(0, 3).map((row, i) => ({
     rank: i + 1,
     teamName: row.teamName,
-    score: useRedEgg ? row.redEgg : row.goldenEgg,
+    score: redEgg ? row.redEgg : row.goldenEgg,
   }));
 }
 
@@ -37,7 +27,7 @@ export function eventGraphics(nodecg: NodeCG) {
   const broadcastScheduleRep = nodecg.Replicant('broadcastSchedule');
   const scenarioListRep = nodecg.Replicant('scenarioList');
   const aggregationDataRep = nodecg.Replicant('aggregationData');
-  nodecg.Replicant('selectedPlayerRowIndex', { defaultValue: -1 });
+  nodecg.Replicant('selectedPlayerRowIndex', { defaultValue: null });
 
   // __dirname = bundle/extension/ → 1つ上がバンドルルート
   const bundlePath = resolve(__dirname, '..');

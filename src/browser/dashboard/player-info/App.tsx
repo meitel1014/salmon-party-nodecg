@@ -9,14 +9,15 @@ export function App() {
   const [teamName, setTeamName] = useState('');
   const [players, setPlayers] = useState<[string, string, string, string]>(['', '', '', '']);
   const [rule, setRule] = useState('');
-  const [status, setStatus] = useState('');
+  const [applyState, setApplyState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const prevRowIndexRef = useRef<number | undefined>(undefined);
   const prevScheduleRef = useRef<typeof broadcastSchedule>(undefined);
 
   // 選択チームが変わった、またはCSVリロードでbroadcastScheduleが更新されたらフォームを上書き
   useEffect(() => {
-    if (selectedRowIndex === undefined || selectedRowIndex === -1) return;
+    if (selectedRowIndex == null) return;
     const rowChanged = prevRowIndexRef.current !== selectedRowIndex;
     const scheduleChanged = prevScheduleRef.current !== broadcastSchedule;
     if (!rowChanged && !scheduleChanged) return;
@@ -28,17 +29,18 @@ export function App() {
     setTeamName(row.displayTeamName || row.teamName);
     setPlayers([...row.players] as [string, string, string, string]);
     setRule(row.rule);
-    setStatus('');
   }, [selectedRowIndex, broadcastSchedule]);
 
   const handleApply = async () => {
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     try {
-      setStatus('適用中...');
+      setApplyState('pending');
       await nodecg.sendMessage('setPlayerScreenDirect', { teamName, players, rule });
-      setStatus(`✓ ${teamName}`);
-    } catch (err) {
-      setStatus(`エラー: ${(err as Error).message}`);
+      setApplyState('success');
+    } catch {
+      setApplyState('error');
     }
+    resetTimerRef.current = setTimeout(() => setApplyState('idle'), 1500);
   };
 
   return (
@@ -82,13 +84,12 @@ export function App() {
       </div>
 
       <button
-        className="apply-button"
+        className={`apply-button apply-button--${applyState}`}
         onClick={handleApply}
-        disabled={selectedRowIndex === undefined || selectedRowIndex === -1}
+        disabled={selectedRowIndex == null || applyState === 'pending'}
       >
         適用
       </button>
-      <span className="status">{status}</span>
     </div>
   );
 }

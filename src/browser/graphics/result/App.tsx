@@ -1,15 +1,6 @@
 import { useReplicant } from '../../hooks/useReplicant';
+import { getRuleColor } from '../../../rules';
 import './style.css';
-
-function getRuleColor(rule: string): string {
-  switch (rule) {
-    case '乱獲':     return '#222222';
-    case '姫鮭':     return '#e58110';
-    case 'ローポイント': return '#4a85d8';
-    case '赤乱獲':   return '#cc0000';
-    default:         return '#555555';
-  }
-}
 
 export function ResultGraphic() {
   const [resultScreen] = useReplicant('resultScreen');

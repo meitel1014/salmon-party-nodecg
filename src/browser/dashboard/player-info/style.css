@@ -63,6 +63,7 @@
   font-weight: 600;
   cursor: pointer;
   width: 100%;
+  transition: background 0.15s, color 0.15s;
 }
 
 .apply-button:disabled {
@@ -70,8 +71,31 @@
   cursor: default;
 }
 
-.status {
-  font-size: 14px;
-  color: #888888;
-  min-height: 16px;
+.apply-button--pending {
+  background: #888888;
+  color: #ffffff;
+}
+
+.apply-button--success {
+  background: #2ecc71;
+  color: #ffffff;
+  animation: flash-success 1.5s ease forwards;
+}
+
+.apply-button--error {
+  background: #e74c3c;
+  color: #ffffff;
+  animation: flash-error 1.5s ease forwards;
+}
+
+@keyframes flash-success {
+  0%   { background: #2ecc71; }
+  70%  { background: #2ecc71; }
+  100% { background: #ffffff; color: #000000; }
+}
+
+@keyframes flash-error {
+  0%   { background: #e74c3c; }
+  70%  { background: #e74c3c; }
+  100% { background: #ffffff; color: #000000; }
 }
