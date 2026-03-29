@@ -1,9 +1,16 @@
-import type { Alert, Stopwatch } from '../schemas';
+import type {
+  PlayerScreen,
+  ResultScreen,
+  BroadcastSchedule,
+  ScenarioList,
+} from '../schemas';
 
 /**
  * すべてのReplicantの型を定義するマップ
  */
 export type ReplicantMap = {
-  alert: Alert;
-  stopwatch: Stopwatch;
+  playerScreen: PlayerScreen;
+  resultScreen: ResultScreen;
+  broadcastSchedule: BroadcastSchedule;
+  scenarioList: ScenarioList;
 };

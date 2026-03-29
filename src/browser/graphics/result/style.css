@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap');
+
+.result-overlay {
+  position: fixed;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  background: transparent;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+}
+
+.subtitle {
+  position: absolute;
+  top: 230px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 62px;
+  font-weight: 700;
+  color: #555555;
+  white-space: nowrap;
+}
+
+.rankings {
+  position: absolute;
+  top: 360px;
+  left: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+  width: 1080px;
+}
+
+.ranking-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 36px 40px;
+}
+
+.team-name {
+  flex: 1;
+  font-size: 60px;
+  font-weight: 700;
+  color: #555555;
+}
+
+.score {
+  font-size: 60px;
+  font-weight: 700;
+  color: #555555;
+  white-space: nowrap;
+}

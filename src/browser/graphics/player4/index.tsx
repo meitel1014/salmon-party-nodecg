@@ -1,6 +1,6 @@
 import '@/browser/global.css';
 import { createRoot } from 'react-dom/client';
-import { ExampleDashboard } from './App';
+import { PlayerGraphic } from '../player/PlayerGraphic';
 
 const root = createRoot(document.getElementById('root')!);
-root.render(<ExampleDashboard />);
+root.render(<PlayerGraphic playerIndex={3} />);

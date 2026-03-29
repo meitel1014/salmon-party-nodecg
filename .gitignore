@@ -33,3 +33,6 @@ db
 
 # Temporary files
 .temp
+
+# Data
+sample-data

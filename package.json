@@ -1,5 +1,5 @@
 {
-  "name": "nodecg-template-with-vite",
+  "name": "salmon-party-nodecg",
   "license": "MIT",
   "private": true,
   "version": "0.0.0",
@@ -15,18 +15,19 @@
     "compatibleRange": "^2.0.0",
     "dashboardPanels": [
       {
-        "name": "example",
-        "title": "example",
-        "file": "example.html",
-        "fullbleed": true
+        "name": "control",
+        "title": "Control",
+        "file": "control.html",
+        "width": 4,
+        "workspace": "Event"
       }
     ],
     "graphics": [
-      {
-        "file": "example.html",
-        "width": 1920,
-        "height": 1080
-      }
+      { "file": "player1.html", "width": 1920, "height": 1080 },
+      { "file": "player2.html", "width": 1920, "height": 1080 },
+      { "file": "player3.html", "width": 1920, "height": 1080 },
+      { "file": "player4.html", "width": 1920, "height": 1080 },
+      { "file": "result.html",  "width": 1920, "height": 1080 }
     ]
   },
   "dependencies": {
