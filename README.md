@@ -7,7 +7,12 @@ Splatoon 3 サーモンラン大会「Salmon Party！」向けの NodeCG 配信�
 ## 必要環境
 
 - Node.js v22 以上
-- pnpm（`corepack enable` で有効化）
+- pnpm（corepack で有効化）
+
+```bash
+corepack enable
+corepack prepare pnpm@latest --activate
+```
 
 
 ## セットアップ
