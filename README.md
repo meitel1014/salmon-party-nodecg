@@ -63,7 +63,4 @@ CSV 編集後は、ダッシュボードの **設定 → CSV リロード** パ�
 3. ランキングを確認し、「**適用**」ボタンを押す → Graphic が更新される
 
 ## ライセンス
-
-このプロジェクトは MIT ライセンスのもとで公開されています。
-
 本コードは [bozitoma/nodecg-template-with-vite](https://github.com/bozitoma/nodecg-template-with-vite)（MIT License, Copyright (c) 2026 bozitoma）をベースに作成しています。
