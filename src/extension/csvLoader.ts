@@ -26,30 +26,18 @@ export interface AggregationRow {
 
 export function loadCsvData(bundlePath: string): CsvData {
   const dataDir = join(bundlePath, 'data');
-  const sampleDataDir = join(bundlePath, 'sample-data', 'data');
 
-  // ルール.csv: シナリオ番号 → ルール名
+  // ルール.csv: シナリオ番号, ルール, シナリオ名_表示用, 部
   const ruleRaw = parseCSV(readFileSync(join(dataDir, 'ルール.csv'), 'utf8'));
-  const ruleMap = new Map<number, string>();
-  for (const row of ruleRaw.slice(1)) {
-    if (row.length < 2) continue;
-    ruleMap.set(Number(row[0].trim()), row[1].trim());
-  }
-
-  // scenario.csv（シナリオ番号・表示名・セクション取得。ルールは ルール.csv を使用）
-  const scenarioRaw = parseCSV(readFileSync(join(sampleDataDir, 'scenario.csv'), 'utf8'));
-  const scenarioList: ScenarioInfo[] = scenarioRaw
+  const scenarioList: ScenarioInfo[] = ruleRaw
     .slice(1)
-    .filter((row) => row.length >= 7)
-    .map((row) => {
-      const scenarioNumber = Number(row[0].trim());
-      return {
-        scenarioNumber,
-        displayName: row[2].trim(),
-        rule: ruleMap.get(scenarioNumber) ?? row[3].trim(),
-        section: row[6].trim(),
-      };
-    });
+    .filter((row) => row.length >= 4)
+    .map((row) => ({
+      scenarioNumber: Number(row[0].trim()),
+      rule: row[1].trim(),
+      displayName: row[2].trim(),
+      section: row[3].trim(),
+    }));
 
   // 配信卓.csv: シナリオ番号, チーム名, シナリオ表示名(省略可)
   const broadcastTableRaw = parseCSV(readFileSync(join(dataDir, '配信卓.csv'), 'utf8'));
@@ -146,7 +134,7 @@ export function loadCsvData(bundlePath: string): CsvData {
   const broadcastSchedule = [...zenhanRows, ...kyukeiScheduleRows, ...kohanRows];
 
   // 集計.csv
-  const aggregationRaw = parseCSV(readFileSync(join(sampleDataDir, '集計.csv'), 'utf8'));
+  const aggregationRaw = parseCSV(readFileSync(join(dataDir, '集計.csv'), 'utf8'));
   const aggregation: AggregationRow[] = aggregationRaw
     .slice(1)
     .filter((row) => row.length >= 8 && row[4].trim() !== '' && row[5].trim() !== '')

@@ -35,8 +35,7 @@ NodeCG は **Dashboard**（管理画面）・**Graphics**（配信オーバー�
 
 ## データファイル
 
-大会ごとに編集する CSV は `data/` に配置する。仕様は [`data/README.md`](data/README.md) を参照。
-システム参照用データ（シナリオ一覧・集計）は `sample-data/data/` に配置する。
+すべての CSV は `data/` に配置する。仕様は [`data/README.md`](data/README.md) を参照。
 
 ## バンドル名
 
