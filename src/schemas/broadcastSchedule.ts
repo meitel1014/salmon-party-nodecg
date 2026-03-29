@@ -3,8 +3,10 @@ import { z } from 'zod';
 export const broadcastRowSchema = z.object({
   scenarioNumber: z.number().nullable().default(null),
   teamName: z.string().default(''),
+  displayTeamName: z.string().default(''),
   players: z.tuple([z.string(), z.string(), z.string(), z.string()]).default(['', '', '', '']),
   rule: z.string().default(''),
+  isBroadcastTable: z.boolean().default(false),
 });
 
 export const broadcastScheduleSchema = z.array(broadcastRowSchema).default([]);

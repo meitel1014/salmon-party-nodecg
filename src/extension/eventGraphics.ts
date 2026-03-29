@@ -62,8 +62,13 @@ export function eventGraphics(nodecg: NodeCG) {
       if (ack && !ack.handled) ack(null, { success: false, error: `Row ${rowIndex} not found` });
       return;
     }
+    const scenario = csvData.scenarioList.find((s) => s.scenarioNumber === row.scenarioNumber);
+    const overrideName = row.scenarioNumber != null
+      ? csvData.broadcastDisplayNames[row.scenarioNumber]
+      : undefined;
+    const displayTeamName = overrideName ?? row.teamName;
     playerScreenRep.value = {
-      teamName: row.teamName,
+      teamName: displayTeamName,
       players: [...row.players] as [string, string, string, string],
       rule: row.rule,
     };

@@ -9,11 +9,10 @@ export function App() {
 
   const [playerScenarioIdx, setPlayerScenarioIdx] = useState(0);
   const [playerRowIndex, setPlayerRowIndex] = useState(-1);
-  const [playerStatus, setPlayerStatus] = useState('');
 
   const prevPlayerScenarioIdxRef = useRef<number | null>(null);
 
-  // シナリオが変わったときチームを自動選択
+  // シナリオが変わったときチームを自動選択（Graphicへの適用はチーム情報パネルの「適用」で行う）
   useEffect(() => {
     if (!scenarioList || !broadcastSchedule) return;
     if (prevPlayerScenarioIdxRef.current === playerScenarioIdx) return;
@@ -22,9 +21,15 @@ export function App() {
     const scenario = scenarioList[playerScenarioIdx];
     if (!scenario) return;
 
-    const found = broadcastSchedule.findIndex(
-      (r) => r.scenarioNumber === scenario.scenarioNumber && r.players.some((p) => p !== '')
-    );
+    const found = (() => {
+      const tableIdx = broadcastSchedule.findIndex(
+        (r) => r.scenarioNumber === scenario.scenarioNumber && r.isBroadcastTable
+      );
+      if (tableIdx !== -1) return tableIdx;
+      return broadcastSchedule.findIndex(
+        (r) => r.scenarioNumber === scenario.scenarioNumber && r.players.some((p) => p !== '')
+      );
+    })();
     setPlayerRowIndex(found);
     setSelectedPlayerRowIndex(found);
   }, [playerScenarioIdx, scenarioList, broadcastSchedule]);
@@ -32,36 +37,17 @@ export function App() {
   const currentScenario = scenarioList?.[playerScenarioIdx];
   const scenarioCount = scenarioList?.length ?? 0;
 
-  // プレイヤー情報があるチームのみ選択可能
+  // 現在のシナリオのチームのうち、プレイヤー情報があるもののみ選択可能
   const selectableTeams = useMemo(
     () =>
       (broadcastSchedule ?? []).flatMap((row, i) =>
-        row.players.some((p) => p !== '') ? [{ i, row }] : []
+        row.scenarioNumber === currentScenario?.scenarioNumber && row.players.some((p) => p !== '')
+          ? [{ i, row }]
+          : []
       ),
-    [broadcastSchedule]
+    [broadcastSchedule, currentScenario]
   );
   const hasTeamInfo = playerRowIndex !== -1;
-
-  const handleApplyPlayer = async () => {
-    if (!hasTeamInfo) return;
-    try {
-      setPlayerStatus('適用中...');
-      await nodecg.sendMessage('setPlayerScreen', { rowIndex: playerRowIndex });
-      const row = broadcastSchedule?.[playerRowIndex];
-      setPlayerStatus(row ? `✓ ${row.teamName}` : '✓ 適用しました');
-    } catch (err) {
-      setPlayerStatus(`エラー: ${(err as Error).message}`);
-    }
-  };
-
-  const handleReload = async () => {
-    try {
-      await nodecg.sendMessage('reloadCsvData');
-      setPlayerStatus('');
-    } catch (err) {
-      console.error('Reload failed:', err);
-    }
-  };
 
   return (
     <div className="container">
@@ -91,42 +77,25 @@ export function App() {
 
         <span className="section-title">チーム</span>
         {hasTeamInfo ? (
-          <div className="row">
-            <select
-              className="select"
-              value={playerRowIndex}
-              onChange={(e) => {
-                const idx = Number(e.target.value);
-                setPlayerRowIndex(idx);
-                setSelectedPlayerRowIndex(idx);
-              }}
-            >
-              {selectableTeams.map(({ i, row }) => (
-                <option key={i} value={i}>
-                  {row.teamName}
-                  {row.scenarioNumber !== null ? ` (S${row.scenarioNumber})` : ''}
-                </option>
-              ))}
-            </select>
-            <button className="apply-button" onClick={handleApplyPlayer}>
-              適用
-            </button>
-          </div>
+          <select
+            className="select"
+            value={playerRowIndex}
+            onChange={(e) => {
+              const idx = Number(e.target.value);
+              setPlayerRowIndex(idx);
+              setSelectedPlayerRowIndex(idx);
+            }}
+          >
+            {selectableTeams.map(({ i, row }) => (
+              <option key={i} value={i}>
+                {row.teamName}
+              </option>
+            ))}
+          </select>
         ) : (
-          <div className="row">
-            <span className="no-team">チーム情報なし</span>
-            <button className="apply-button" disabled>
-              適用
-            </button>
-          </div>
+          <span className="no-team">チーム情報なし</span>
         )}
-        <span className="status">{playerStatus}</span>
       </div>
-
-      <hr className="divider" />
-      <button className="reload-button" onClick={handleReload}>
-        CSV リロード
-      </button>
     </div>
   );
 }

@@ -34,6 +34,13 @@
         "file": "result.html",
         "width": 4,
         "workspace": "結果発表"
+      },
+      {
+        "name": "csv-reload",
+        "title": "CSV リロード",
+        "file": "csv-reload.html",
+        "width": 3,
+        "workspace": "設定"
       }
     ],
     "graphics": [

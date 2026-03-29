@@ -21,14 +21,8 @@
   letter-spacing: 0.05em;
 }
 
-.row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
 .select {
-  flex: 1;
+  width: 100%;
   padding: 8px 10px;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -38,46 +32,6 @@
   outline: none;
 }
 
-.apply-button {
-  padding: 8px 16px;
-  background: #ffffff;
-  color: #000000;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.apply-button:disabled {
-  background: rgba(255, 255, 255, 0.2);
-  color: #888888;
-  cursor: default;
-}
-
-.reload-button {
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  color: #aaaaaa;
-  font-size: 15px;
-  cursor: pointer;
-  width: 100%;
-}
-
-.divider {
-  border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  margin: 0;
-}
-
-.status {
-  font-size: 14px;
-  color: #888888;
-  min-height: 16px;
-}
 
 .scenario-nav {
   display: flex;

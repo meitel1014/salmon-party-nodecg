@@ -21,7 +21,7 @@ export function App() {
 
     const row = broadcastSchedule?.[selectedRowIndex];
     if (!row) return;
-    setTeamName(row.teamName);
+    setTeamName(row.displayTeamName || row.teamName);
     setPlayers([...row.players] as [string, string, string, string]);
     setRule(row.rule);
     setStatus('');
@@ -40,7 +40,7 @@ export function App() {
   return (
     <div className="container">
       <div className="field">
-        <label className="label">チーム名</label>
+        <label className="label">チーム名表示</label>
         <input
           className="input"
           value={teamName}
