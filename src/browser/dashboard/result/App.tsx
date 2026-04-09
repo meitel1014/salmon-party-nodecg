@@ -7,6 +7,7 @@ import './style.css';
 export function App() {
   const [scenarioList] = useReplicant('scenarioList');
   const [aggregationData] = useReplicant('aggregationData');
+  const [broadcastSchedule] = useReplicant('broadcastSchedule');
 
   const [scenarioNumber, setScenarioNumber] = useState<number | null>(null);
   const [applyState, setApplyState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
@@ -24,8 +25,13 @@ export function App() {
   const allRankings = useMemo(() => {
     if (!aggregationData || scenarioNumber === null || !currentScenario) return [];
     const rows = aggregationData.filter((r) => r.scenarioNumber === scenarioNumber);
-    return sortByRanking(rows, currentScenario.rule);
-  }, [aggregationData, scenarioNumber, currentScenario]);
+    return sortByRanking(rows, currentScenario.rule).map((r) => {
+      const bRow = broadcastSchedule?.find(
+        (b) => b.scenarioNumber === scenarioNumber && b.teamName === r.teamName
+      );
+      return { ...r, members: bRow?.players ?? ['', '', '', ''] };
+    });
+  }, [aggregationData, broadcastSchedule, scenarioNumber, currentScenario]);
 
   const handleApplyResult = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (scenarioNumber === null) return;
@@ -75,6 +81,10 @@ export function App() {
                 <th>チーム名</th>
                 <th className="egg-col">金イクラ</th>
                 <th className="egg-col">赤イクラ</th>
+                <th>メンバー1</th>
+                <th>メンバー2</th>
+                <th>メンバー3</th>
+                <th>メンバー4</th>
               </tr>
             </thead>
             <tbody>
@@ -84,6 +94,10 @@ export function App() {
                   <td>{r.teamName}</td>
                   <td className="egg-col">{r.goldenEgg}</td>
                   <td className="egg-col">{r.redEgg}</td>
+                  <td>{r.members[0]}</td>
+                  <td>{r.members[1]}</td>
+                  <td>{r.members[2]}</td>
+                  <td>{r.members[3]}</td>
                 </tr>
               ))}
             </tbody>

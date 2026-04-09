@@ -7,16 +7,23 @@ import { usesRedEgg } from '../rules';
 
 function calcRankings(
   aggregation: CsvData['aggregation'],
+  broadcastSchedule: CsvData['broadcastSchedule'],
   scenarioNumber: number,
   rule: string
 ): ResultScreen['rankings'] {
   const rows = aggregation.filter((r) => r.scenarioNumber === scenarioNumber);
   const redEgg = usesRedEgg(rule);
-  return sortByRanking(rows, rule).slice(0, 3).map((row, i) => ({
-    rank: i + 1,
-    teamName: row.teamName,
-    score: redEgg ? row.redEgg : row.goldenEgg,
-  }));
+  return sortByRanking(rows, rule).slice(0, 3).map((row, i) => {
+    const bRow = broadcastSchedule.find(
+      (b) => b.scenarioNumber === scenarioNumber && b.teamName === row.teamName
+    );
+    return {
+      rank: i + 1,
+      teamName: row.teamName,
+      members: bRow?.players ?? ['', '', '', ''],
+      score: redEgg ? row.redEgg : row.goldenEgg,
+    };
+  });
 }
 
 export function eventGraphics(nodecg: NodeCG) {
@@ -36,9 +43,9 @@ export function eventGraphics(nodecg: NodeCG) {
 
   function loadAndSync() {
     csvData = loadCsvData(bundlePath);
-    broadcastScheduleRep.value = csvData.broadcastSchedule;
-    scenarioListRep.value = csvData.scenarioList;
-    aggregationDataRep.value = csvData.aggregation;
+    broadcastScheduleRep.value = structuredClone(csvData.broadcastSchedule);
+    scenarioListRep.value = structuredClone(csvData.scenarioList);
+    aggregationDataRep.value = structuredClone(csvData.aggregation);
     log.info(
       `CSV loaded: ${csvData.broadcastSchedule.length} broadcast rows, ` +
       `${csvData.scenarioList.length} scenarios, ` +
@@ -66,12 +73,19 @@ export function eventGraphics(nodecg: NodeCG) {
       if (ack && !ack.handled) ack(null, { success: false, error: `Scenario ${scenarioNumber} not found` });
       return;
     }
-    const rankings = calcRankings(csvData.aggregation, scenarioNumber, scenario.rule);
-    resultScreenRep.value = {
-      scenarioDisplayName: scenario.displayName,
-      rule: scenario.rule,
-      rankings,
-    };
+    const rankings = calcRankings(csvData.aggregation, csvData.broadcastSchedule, scenarioNumber, scenario.rule);
+    try {
+      resultScreenRep.value = structuredClone({
+        scenarioDisplayName: scenario.displayName,
+        rule: scenario.rule,
+        rankings,
+      });
+    } catch (err) {
+      log.error('Failed to set resultScreen:', err);
+      log.error('rankings payload:', JSON.stringify(rankings));
+      if (ack && !ack.handled) ack(null, { success: false, error: (err as Error).message });
+      return;
+    }
     log.info(`Result screen set to: ${scenario.displayName} (${scenario.rule}), ${rankings.length} teams ranked`);
     if (ack && !ack.handled) ack(null, { success: true });
   });

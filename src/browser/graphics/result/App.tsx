@@ -19,6 +19,11 @@ export function ResultGraphic() {
         {resultScreen.rankings.map((entry) => (
           <div key={entry.rank} className="ranking-row">
             <span className="team-name">{entry.teamName}</span>
+            <div className="members-grid">
+              {(entry.members ?? ['', '', '', '']).map((name, i) => (
+                <span key={i} className="member-name">{name}</span>
+              ))}
+            </div>
             <span className="score">{entry.score.toLocaleString()}個</span>
           </div>
         ))}

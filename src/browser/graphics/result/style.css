@@ -44,6 +44,20 @@
   color: #555555;
 }
 
+.members-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 24px;
+  flex-shrink: 0;
+}
+
+.member-name {
+  font-size: 30px;
+  font-weight: 400;
+  color: #555555;
+  white-space: nowrap;
+}
+
 .score {
   font-size: 60px;
   font-weight: 700;
