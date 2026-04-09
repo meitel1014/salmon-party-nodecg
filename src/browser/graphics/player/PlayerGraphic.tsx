@@ -8,18 +8,18 @@ type Props = {
 
 // ── 調整用定数 ───────────────────────────────────────────
 const SLOT_START_TOP     = 262; // 最初のバーの top (px)
-const SLOT_LEFT          = 40;  // バーの left (px, 共通)
+const SLOT_LEFT          = 20;  // バーの left (px, 共通)
 const GAP_ACTIVE   = 26;  // active バーの前後の隙間 (px)
 const GAP_INACTIVE = 17;  // inactive バーの前後の隙間 (px)
 
-const INACTIVE = { width: 260, height: 40 } as const;
-const ACTIVE   = { width: 320, height: 56 } as const;
+const INACTIVE = { width: 300, height: 40 } as const;
+const ACTIVE   = { width: 365, height: 56 } as const;
 
 const FONT_ACTIVE   = 32; // pt
 const FONT_INACTIVE = 24; // pt
 
 const RULE_BAR = { top: 935, left: 0, height: 36, width: 300 };
-const TEAM_BAR = { top: 988, left: 0, height: 78, width: 500 };
+const TEAM_BAR = { top: 988, left: 20, height: 78, width: 450 };
 // ────────────────────────────────────────────────────────
 
 function buildSlot(i: number, playerIndex: number) {
