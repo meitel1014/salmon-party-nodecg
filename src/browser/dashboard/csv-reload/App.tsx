@@ -2,6 +2,9 @@ import { useState } from 'react';
 
 // NodeCG dashboard provides paper-button as a Polymer web component
 declare global {
+  // JSX.IntrinsicElements の拡張は namespace 宣言でしか行えず ES module 構文に置換できないため、
+  // このルールのみ限定的に無効化する。
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace React.JSX {
     interface IntrinsicElements {
       'paper-button': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {

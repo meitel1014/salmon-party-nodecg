@@ -8,14 +8,10 @@ export function App() {
   const [scenarioList] = useReplicant('scenarioList');
   const [selectedRowIndex, setSelectedRowIndex] = useReplicant('selectedPlayerRowIndex');
 
-  const [playerScenarioNumber, setPlayerScenarioNumber] = useState<number | null>(null);
+  const [selectedScenarioNumber, setSelectedScenarioNumber] = useState<number | null>(null);
 
-  // scenarioList がロードされたら最初のシナリオを選択
-  useEffect(() => {
-    if (!scenarioList || scenarioList.length === 0) return;
-    if (playerScenarioNumber !== null) return;
-    setPlayerScenarioNumber(scenarioList[0].scenarioNumber);
-  }, [scenarioList, playerScenarioNumber]);
+  // 明示選択が無ければ最初のシナリオを既定にする（effect で setState せず render 中に導出）
+  const playerScenarioNumber = selectedScenarioNumber ?? scenarioList?.[0]?.scenarioNumber ?? null;
 
   // シナリオが変わったときチームを自動選択（Graphicへの適用はチーム情報パネルの「適用」で行う）
   useEffect(() => {
@@ -51,7 +47,7 @@ export function App() {
         <ScenarioNav
           scenarioList={scenarioList}
           currentScenarioNumber={playerScenarioNumber}
-          onScenarioChange={setPlayerScenarioNumber}
+          onScenarioChange={setSelectedScenarioNumber}
         />
 
         <span className="section-title">チーム</span>
