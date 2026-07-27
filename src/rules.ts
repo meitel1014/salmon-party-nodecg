@@ -20,7 +20,7 @@ export function isAscendingRule(rule: string): boolean {
 /** ルール名に対応する表示色を返す */
 export function getRuleColor(rule: string): string {
   switch (rule) {
-    case RULES.RAMPAGE:    return '#222222';
+    // case RULES.RAMPAGE:    return '#222222';
     case RULES.PRINCESS:   return '#e58110';
     case RULES.LOW_POINT:  return '#4a85d8';
     case RULES.RED_RAMPAGE: return '#cc0000';

@@ -12,6 +12,13 @@ type Props = {
  * テキストが親の幅を超えたら自動で縮小して収める。
  * 内部で scrollWidth と clientWidth を比較し、
  * はみ出していれば transform: scale() で縮小する。
+ *
+ * 揃え位置は必ず flex（justify-content）で行い、text-align は使わない。
+ * transform はレイアウトに影響しないため「縮小前の span の位置」が基準になるが、
+ * text-align: center は中身が幅を超えるとオフセットを 0 でクランプして右側だけに
+ * はみ出させる。すると span の中心が枠の中心とずれ、transform-origin: center で
+ * 縮小しても右にずれたまま枠外へ出てしまう。flex の justify-content: center は
+ * 負のフリースペースを左右均等に配分するので中心が一致し、縮小後にちょうど収まる。
  */
 export function FitText({ html, align = 'left', style, ...rest }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,9 +54,18 @@ export function FitText({ html, align = 'left', style, ...rest }: Props) {
   }, [html]);
 
   const origin = align === 'right' ? 'right top' : align === 'center' ? 'center top' : 'left top';
+  const justify = align === 'right' ? 'flex-end' : align === 'center' ? 'center' : 'flex-start';
 
   return (
-    <div ref={containerRef} style={{ ...style }} {...rest}>
+    // display/justifyContent/alignItems は transform-origin と対で成り立つ FitText の
+    // 前提なので、呼び出し側の style で壊せないよう spread のあとに置く。
+    // alignItems は stretch にしない（span の高さがコンテナ高さに引き伸ばされると
+    // ResizeObserver → 再測定 → 高さ更新 のループになるため）。
+    <div
+      ref={containerRef}
+      style={{ ...style, display: 'flex', justifyContent: justify, alignItems: 'flex-start' }}
+      {...rest}
+    >
       <span
         ref={innerRef}
         style={{
