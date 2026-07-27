@@ -44,27 +44,28 @@ export function PlayerGraphic({ playerIndex }: Props) {
       {playerScreen.players.map((name, i) => {
         const isActive = i === playerIndex;
         const slot = buildSlot(i, playerIndex);
+        // 固定サイズ・中央寄せは親ボックスが担い、font-size は継承させる。
+        // FitText 自身の height は実行時に上書きされるため親に持たせる。
         return (
-          <FitText
+          <div
             key={i}
-            maxFontSize={isActive ? FONT_ACTIVE : FONT_INACTIVE}
             className={`player-slot ${isActive ? 'active' : 'inactive'}`}
-            style={slot}
+            style={{ ...slot, fontSize: `${isActive ? FONT_ACTIVE : FONT_INACTIVE}pt` }}
           >
-            {name}
-          </FitText>
+            <FitText html={name} align="center" style={{ width: '100%', textAlign: 'center' }} />
+          </div>
         );
       })}
 
       {/* ルール */}
-      <FitText maxFontSize={20} className="rule-slot" style={RULE_BAR}>
-        {playerScreen.rule}
-      </FitText>
+      <div className="rule-slot" style={RULE_BAR}>
+        <FitText html={playerScreen.rule} align="center" style={{ width: '100%', textAlign: 'center' }} />
+      </div>
 
       {/* チーム名 */}
-      <FitText maxFontSize={40} className="team-slot" style={TEAM_BAR}>
-        {playerScreen.teamName}
-      </FitText>
+      <div className="team-slot" style={TEAM_BAR}>
+        <FitText html={playerScreen.teamName} align="center" style={{ width: '100%', textAlign: 'center' }} />
+      </div>
     </div>
   );
 }
