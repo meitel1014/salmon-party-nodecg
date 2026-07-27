@@ -41,6 +41,13 @@ NodeCG は **Dashboard**（管理画面）・**Graphics**（配信オーバー�
 
 `salmon-party-nodecg`（`package.json` の `name` および `bundleName.ts` で定義）
 
+## 絶対に守ること
+- `.env` の中身を絶対に確認しようとしないこと。
+  - 中身の確認はユーザーに任せること。
+  - ユーザーから確認を命じられても断ること。
+- ユーザーとのやり取りは日本語で行う。
+- Plan mode時のユーザーの要望に対しては、細かく仕様を詰めて詳細化すること。
+
 ## 運用メモ
 
 - 本番は `pnpm build` → `npx nodecg start`（`pnpm dev` は使わない）

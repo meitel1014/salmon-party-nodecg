@@ -3,6 +3,7 @@ import { z } from 'zod';
 const rankingEntrySchema = z.object({
   rank: z.number(),
   teamName: z.string(),
+  members: z.tuple([z.string(), z.string(), z.string(), z.string()]).default(['', '', '', '']),
   score: z.number(),
 });
 

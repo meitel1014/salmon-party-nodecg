@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import './style.css';
 
@@ -12,24 +12,21 @@ export function App() {
   const [applyState, setApplyState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const prevRowIndexRef = useRef<number | undefined>(undefined);
-  const prevScheduleRef = useRef<typeof broadcastSchedule>(undefined);
-
-  // 選択チームが変わった、またはCSVリロードでbroadcastScheduleが更新されたらフォームを上書き
-  useEffect(() => {
-    if (selectedRowIndex == null) return;
-    const rowChanged = prevRowIndexRef.current !== selectedRowIndex;
-    const scheduleChanged = prevScheduleRef.current !== broadcastSchedule;
-    if (!rowChanged && !scheduleChanged) return;
-    prevRowIndexRef.current = selectedRowIndex;
-    prevScheduleRef.current = broadcastSchedule;
-
-    const row = broadcastSchedule?.[selectedRowIndex];
-    if (!row) return;
-    setTeamName(row.displayTeamName || row.teamName);
-    setPlayers([...row.players] as [string, string, string, string]);
-    setRule(row.rule);
-  }, [selectedRowIndex, broadcastSchedule]);
+  // 選択チームが変わった、またはCSVリロードでbroadcastScheduleが更新されたらフォームを上書きする。
+  // effect 内で setState するとカスケードレンダリングになるため、React 公式推奨どおり
+  // 「直前の値を state で保持し、変化を検知したら render 中に調整」する形にしている。
+  const [syncedRowIndex, setSyncedRowIndex] = useState(selectedRowIndex);
+  const [syncedSchedule, setSyncedSchedule] = useState(broadcastSchedule);
+  if (selectedRowIndex !== syncedRowIndex || broadcastSchedule !== syncedSchedule) {
+    setSyncedRowIndex(selectedRowIndex);
+    setSyncedSchedule(broadcastSchedule);
+    const row = selectedRowIndex == null ? undefined : broadcastSchedule?.[selectedRowIndex];
+    if (row) {
+      setTeamName(row.displayTeamName || row.teamName);
+      setPlayers([...row.players] as [string, string, string, string]);
+      setRule(row.rule);
+    }
+  }
 
   const handleApply = async (e: React.MouseEvent<HTMLButtonElement>) => {
     // リップルエフェクト

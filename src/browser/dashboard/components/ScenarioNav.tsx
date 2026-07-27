@@ -22,7 +22,7 @@ export function ScenarioNav({ scenarioList, currentScenarioNumber, onScenarioCha
         }}
         disabled={currentIdx <= 0}
       >
-        ←
+        ◀
       </button>
       <span className="scenario-label">
         {current ? `${current.displayName}（${current.rule}）` : '読み込み中...'}
@@ -34,7 +34,7 @@ export function ScenarioNav({ scenarioList, currentScenarioNumber, onScenarioCha
         }}
         disabled={currentIdx >= count - 1}
       >
-        →
+        ▶
       </button>
       {children}
     </div>

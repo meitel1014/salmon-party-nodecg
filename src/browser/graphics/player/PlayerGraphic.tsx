@@ -9,13 +9,13 @@ type Props = {
 // ── 調整用定数 ───────────────────────────────────────────
 const SLOT_START_TOP     = 262; // 最初のバーの top (px)
 const SLOT_LEFT          = 20;  // バーの left (px, 共通)
-const GAP_ACTIVE   = 26;  // active バーの前後の隙間 (px)
+const GAP_ACTIVE   = 13;  // active バーの前後の隙間 (px)
 const GAP_INACTIVE = 17;  // inactive バーの前後の隙間 (px)
 
 const INACTIVE = { width: 300, height: 40 } as const;
-const ACTIVE   = { width: 365, height: 56 } as const;
+const ACTIVE   = { width: 365, height: 80 } as const;
 
-const FONT_ACTIVE   = 32; // pt
+const FONT_ACTIVE   = 36; // pt
 const FONT_INACTIVE = 24; // pt
 
 const RULE_BAR = { top: 935, left: 0, height: 36, width: 300 };
@@ -44,27 +44,28 @@ export function PlayerGraphic({ playerIndex }: Props) {
       {playerScreen.players.map((name, i) => {
         const isActive = i === playerIndex;
         const slot = buildSlot(i, playerIndex);
+        // 固定サイズ・中央寄せは親ボックスが担い、font-size は継承させる。
+        // FitText 自身の height は実行時に上書きされるため親に持たせる。
         return (
-          <FitText
+          <div
             key={i}
-            maxFontSize={isActive ? FONT_ACTIVE : FONT_INACTIVE}
             className={`player-slot ${isActive ? 'active' : 'inactive'}`}
-            style={slot}
+            style={{ ...slot, fontSize: `${isActive ? FONT_ACTIVE : FONT_INACTIVE}pt` }}
           >
-            {name}
-          </FitText>
+            <FitText html={name} align="center" style={{ width: '100%' }} />
+          </div>
         );
       })}
 
       {/* ルール */}
-      <FitText maxFontSize={20} className="rule-slot" style={RULE_BAR}>
-        {playerScreen.rule}
-      </FitText>
+      <div className="rule-slot" style={RULE_BAR}>
+        <FitText html={playerScreen.rule} align="center" style={{ width: '100%' }} />
+      </div>
 
       {/* チーム名 */}
-      <FitText maxFontSize={40} className="team-slot" style={TEAM_BAR}>
-        {playerScreen.teamName}
-      </FitText>
+      <div className="team-slot" style={TEAM_BAR}>
+        <FitText html={playerScreen.teamName} align="center" style={{ width: '100%' }} />
+      </div>
     </div>
   );
 }

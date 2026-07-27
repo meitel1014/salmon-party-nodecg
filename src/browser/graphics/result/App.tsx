@@ -10,15 +10,21 @@ export function ResultGraphic() {
   return (
     <div className="result-overlay">
       <span className="subtitle">
-        {resultScreen.scenarioDisplayName}&nbsp;&nbsp;  -&nbsp;
+        {resultScreen.scenarioDisplayName}&nbsp;&nbsp;&nbsp;   
         <span style={{ color: getRuleColor(resultScreen.rule) }}>{resultScreen.rule}</span>
-        &nbsp;-
       </span>
 
       <div className="rankings">
         {resultScreen.rankings.map((entry) => (
           <div key={entry.rank} className="ranking-row">
-            <span className="team-name">{entry.teamName}</span>
+            <div className="team-block">
+              <span className="team-name">{entry.teamName}</span>
+              <div className="members-row">
+                {(entry.members ?? ['', '', '', '']).map((name, i) => (
+                  <span key={i} className="member-name">{name}</span>
+                ))}
+              </div>
+            </div>
             <span className="score">{entry.score.toLocaleString()}個</span>
           </div>
         ))}

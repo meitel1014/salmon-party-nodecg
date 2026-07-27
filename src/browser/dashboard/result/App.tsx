@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import { sortByRanking } from '../../../ranking';
 import { ScenarioNav } from '../components/ScenarioNav';
@@ -7,25 +7,27 @@ import './style.css';
 export function App() {
   const [scenarioList] = useReplicant('scenarioList');
   const [aggregationData] = useReplicant('aggregationData');
+  const [broadcastSchedule] = useReplicant('broadcastSchedule');
 
-  const [scenarioNumber, setScenarioNumber] = useState<number | null>(null);
+  const [selectedScenarioNumber, setSelectedScenarioNumber] = useState<number | null>(null);
   const [applyState, setApplyState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // scenarioList がロードされたら最初のシナリオを選択
-  useEffect(() => {
-    if (!scenarioList || scenarioList.length === 0) return;
-    if (scenarioNumber !== null) return;
-    setScenarioNumber(scenarioList[0].scenarioNumber);
-  }, [scenarioList, scenarioNumber]);
+  // 明示選択が無ければ最初のシナリオを既定にする（effect で setState せず render 中に導出）
+  const scenarioNumber = selectedScenarioNumber ?? scenarioList?.[0]?.scenarioNumber ?? null;
 
   const currentScenario = scenarioList?.find((s) => s.scenarioNumber === scenarioNumber);
 
   const allRankings = useMemo(() => {
     if (!aggregationData || scenarioNumber === null || !currentScenario) return [];
     const rows = aggregationData.filter((r) => r.scenarioNumber === scenarioNumber);
-    return sortByRanking(rows, currentScenario.rule);
-  }, [aggregationData, scenarioNumber, currentScenario]);
+    return sortByRanking(rows, currentScenario.rule).map((r) => {
+      const bRow = broadcastSchedule?.find(
+        (b) => b.scenarioNumber === scenarioNumber && b.teamName === r.teamName
+      );
+      return { ...r, members: bRow?.players ?? ['', '', '', ''] };
+    });
+  }, [aggregationData, broadcastSchedule, scenarioNumber, currentScenario]);
 
   const handleApplyResult = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (scenarioNumber === null) return;
@@ -56,7 +58,7 @@ export function App() {
         <ScenarioNav
           scenarioList={scenarioList}
           currentScenarioNumber={scenarioNumber}
-          onScenarioChange={setScenarioNumber}
+          onScenarioChange={setSelectedScenarioNumber}
         >
           <button
             className={`apply-button apply-button--${applyState}`}
@@ -75,6 +77,10 @@ export function App() {
                 <th>チーム名</th>
                 <th className="egg-col">金イクラ</th>
                 <th className="egg-col">赤イクラ</th>
+                <th>メンバー1</th>
+                <th>メンバー2</th>
+                <th>メンバー3</th>
+                <th>メンバー4</th>
               </tr>
             </thead>
             <tbody>
@@ -84,6 +90,10 @@ export function App() {
                   <td>{r.teamName}</td>
                   <td className="egg-col">{r.goldenEgg}</td>
                   <td className="egg-col">{r.redEgg}</td>
+                  <td>{r.members[0]}</td>
+                  <td>{r.members[1]}</td>
+                  <td>{r.members[2]}</td>
+                  <td>{r.members[3]}</td>
                 </tr>
               ))}
             </tbody>
