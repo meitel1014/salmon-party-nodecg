@@ -31,7 +31,8 @@ export function App() {
   return (
     <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <p style={{ margin: 0, fontSize: '13px', color: '#aaaaaa' }}>
-        ルール.csv・配信卓.csv・チーム情報.csv・集計.csv を再読み込みします。
+        ルール.csv・配信卓.csv・チーム情報.csv を再読み込みし、
+        続けて現在のデータソースから集計データを取得します。
         <br />
         CSV を更新した後にクリックしてください。
       </p>

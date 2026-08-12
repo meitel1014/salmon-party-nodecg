@@ -30,70 +30,63 @@
   outline: none;
 }
 
-.apply-button {
-  padding: 8px 16px;
-  background: #ffffff;
-  color: #000000;
-  border: none;
+/*
+ * 「更新」は集計データを取り直すだけで配信画面を変えないため、
+ * Graphic に出す「適用」（塗りつぶし）と区別できるよう枠線だけのスタイルにする。
+ */
+.reload-button {
+  padding: 8px 14px;
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s;
-  position: relative;
-  overflow: hidden;
 }
 
-.apply-button:hover:not(:disabled) {
-  background: #dddddd;
+.reload-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
 }
 
-.apply-button:disabled {
-  opacity: 0.3;
+.reload-button:disabled {
+  opacity: 0.4;
   cursor: default;
 }
 
-.apply-button--pending {
-  background: #888888;
+.reload-button--success {
+  animation: flash-outline-success 1.5s ease forwards;
 }
 
-.apply-button--success {
-  animation: flash-success 1.5s ease forwards;
+.reload-button--error {
+  animation: flash-outline-error 1.5s ease forwards;
 }
 
-.apply-button--error {
-  animation: flash-error 1.5s ease forwards;
+/* 枠線ボタン用のフラッシュ。終了時の色を地の色（透明・白文字）に戻す */
+@keyframes flash-outline-success {
+  0%   { background: #2ecc71; border-color: #2ecc71; color: #000000; }
+  20%  { background: #2ecc71; border-color: #2ecc71; color: #000000; }
+  100% { background: transparent; border-color: rgba(255, 255, 255, 0.35); color: #ffffff; }
 }
 
-.apply-button .ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.2);
-  transform: scale(0);
-  animation: ripple-expand 1s ease-out forwards;
-  pointer-events: none;
+@keyframes flash-outline-error {
+  0%   { background: #e74c3c; border-color: #e74c3c; color: #ffffff; }
+  20%  { background: #e74c3c; border-color: #e74c3c; color: #ffffff; }
+  100% { background: transparent; border-color: rgba(255, 255, 255, 0.35); color: #ffffff; }
 }
 
-@keyframes ripple-expand {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
+.reload-error {
+  font-size: 13px;
+  color: #e74c3c;
+  word-break: break-all;
 }
 
-@keyframes flash-success {
-  0%   { background: #2ecc71; }
-  20%  { background: #2ecc71; }
-  100% { background: #ffffff; }
+.live-note {
+  font-size: 12px;
+  color: #888888;
 }
-
-@keyframes flash-error {
-  0%   { background: #e74c3c; }
-  20%  { background: #e74c3c; }
-  100% { background: #ffffff; }
-}
-
 
 .no-data {
   font-size: 15px;

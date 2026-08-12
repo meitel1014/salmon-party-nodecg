@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import { sortByRanking } from '../../../ranking';
+import { buildTeamRowIndex, normalizeTeamName } from '../../../teamName';
 import { ScenarioNav } from '../components/ScenarioNav';
 import './style.css';
 
@@ -8,12 +9,17 @@ export function App() {
   const [scenarioList] = useReplicant('scenarioList');
   const [aggregationData] = useReplicant('aggregationData');
   const [broadcastSchedule] = useReplicant('broadcastSchedule');
+  // 選択したシナリオがそのまま Graphic の表示内容になる（適用ボタンは無い）。
+  // ローカルステートではなく Replicant に持たせることで、Extension が結果画面を
+  // 作り直せるようになり、複数の PC からパネルを開いても同じ状態が見える。
+  const [selectedScenarioNumber, setSelectedScenarioNumber] =
+    useReplicant('selectedResultScenarioNumber');
 
-  const [selectedScenarioNumber, setSelectedScenarioNumber] = useState<number | null>(null);
-  const [applyState, setApplyState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
-  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [reloadState, setReloadState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
+  const [reloadError, setReloadError] = useState('');
+  const reloadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 明示選択が無ければ最初のシナリオを既定にする（effect で setState せず render 中に導出）
+  // 未選択なら先頭シナリオ。Extension 側の syncResultScreen と同じ既定にすること
   const scenarioNumber = selectedScenarioNumber ?? scenarioList?.[0]?.scenarioNumber ?? null;
 
   const currentScenario = scenarioList?.find((s) => s.scenarioNumber === scenarioNumber);
@@ -21,35 +27,30 @@ export function App() {
   const allRankings = useMemo(() => {
     if (!aggregationData || scenarioNumber === null || !currentScenario) return [];
     const rows = aggregationData.filter((r) => r.scenarioNumber === scenarioNumber);
+    const teamRows = buildTeamRowIndex(broadcastSchedule ?? [], scenarioNumber);
     return sortByRanking(rows, currentScenario.rule).map((r) => {
-      const bRow = broadcastSchedule?.find(
-        (b) => b.scenarioNumber === scenarioNumber && b.teamName === r.teamName
-      );
+      const bRow = teamRows.get(normalizeTeamName(r.teamName));
       return { ...r, members: bRow?.players ?? ['', '', '', ''] };
     });
   }, [aggregationData, broadcastSchedule, scenarioNumber, currentScenario]);
 
-  const handleApplyResult = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (scenarioNumber === null) return;
-
-    const btn = e.currentTarget;
-    const rect = btn.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const ripple = document.createElement('span');
-    ripple.className = 'ripple';
-    ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px`;
-    btn.appendChild(ripple);
-    ripple.addEventListener('animationend', () => ripple.remove());
-
-    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+  /**
+   * 現在のデータソース（スプレッドシート or 集計.csv）から集計データを取り直す。
+   * 成功すると下の表と Graphic の両方が、選択中シナリオの最新順位に更新される。
+   */
+  const handleReload = async () => {
+    if (reloadTimerRef.current) clearTimeout(reloadTimerRef.current);
+    setReloadState('pending');
+    setReloadError('');
     try {
-      setApplyState('pending');
-      await nodecg.sendMessage('setResultScreen', { scenarioNumber });
-      setApplyState('success');
-    } catch {
-      setApplyState('error');
+      const result = await nodecg.sendMessage('reloadAggregation');
+      setReloadState(result.success ? 'success' : 'error');
+      setReloadError(result.success ? '' : (result.error ?? '読み込みに失敗しました'));
+    } catch (err) {
+      setReloadState('error');
+      setReloadError((err as Error).message || '読み込みに失敗しました');
     }
-    resetTimerRef.current = setTimeout(() => setApplyState('idle'), 1500);
+    reloadTimerRef.current = setTimeout(() => setReloadState('idle'), 1500);
   };
 
   return (
@@ -61,13 +62,16 @@ export function App() {
           onScenarioChange={setSelectedScenarioNumber}
         >
           <button
-            className={`apply-button apply-button--${applyState}`}
-            onClick={handleApplyResult}
-            disabled={scenarioNumber === null || applyState === 'pending'}
+            className={`reload-button reload-button--${reloadState}`}
+            onClick={handleReload}
+            disabled={reloadState === 'pending'}
+            title="集計データを取り直して、下の表と Graphic を最新にします"
           >
-            適用
+            {reloadState === 'pending' ? '更新中...' : '更新'}
           </button>
         </ScenarioNav>
+
+        {!!reloadError && <span className="reload-error">更新に失敗: {reloadError}</span>}
 
         {allRankings.length > 0 ? (
           <table className="rankings-table">

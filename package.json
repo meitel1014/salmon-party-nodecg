@@ -36,6 +36,13 @@
         "workspace": "結果発表"
       },
       {
+        "name": "data-source",
+        "title": "データソース",
+        "file": "data-source.html",
+        "width": 4,
+        "workspace": "設定"
+      },
+      {
         "name": "csv-reload",
         "title": "CSV リロード",
         "file": "csv-reload.html",
@@ -44,15 +51,38 @@
       }
     ],
     "graphics": [
-      { "file": "player1.html", "width": 1920, "height": 1080 },
-      { "file": "player2.html", "width": 1920, "height": 1080 },
-      { "file": "player3.html", "width": 1920, "height": 1080 },
-      { "file": "player4.html", "width": 1920, "height": 1080 },
-      { "file": "result.html",  "width": 1920, "height": 1080 }
+      {
+        "file": "player1.html",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "file": "player2.html",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "file": "player3.html",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "file": "player4.html",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "file": "result.html",
+        "width": 1920,
+        "height": 1080
+      }
     ]
   },
   "dependencies": {
+    "csv-parse": "^6.2.1",
     "globby": "^16.0.0",
+    "google-auth-library": "^10.9.1",
+    "google-spreadsheet": "^5.3.0",
     "nodecg": "^2.6.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

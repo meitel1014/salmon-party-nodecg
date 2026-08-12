@@ -15,3 +15,8 @@ export type { ScenarioList, ScenarioInfo } from './scenarioList';
 
 export { aggregationDataSchema } from './aggregation';
 export type { AggregationData, AggregationRow } from './aggregation';
+
+// Replicant に対応するスキーマのみを export する（`*Schema` の export ごとに
+// schemas/<name>.json が生成されるため、dataSourceTypeSchema は出さない）
+export { dataSourceConfigSchema, aggregationStatusSchema } from './dataSource';
+export type { DataSourceType, DataSourceConfig, AggregationStatus } from './dataSource';

@@ -1,32 +1,34 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { parse } from 'csv-parse/sync';
 import type { BroadcastRow, ScenarioInfo } from '../schemas';
 
 export interface CsvData {
   broadcastSchedule: BroadcastRow[];
   scenarioList: ScenarioInfo[];
-  aggregation: AggregationRow[];
   warnings: string[];
-}
-
-export interface AggregationRow {
-  teamName: string;
-  scenarioNumber: number;
-  goldenEgg: number;
-  redEgg: number;
 }
 
 // ─── CSV パース ────────────────────────────────────────────
 
-function parseCSV(content: string): string[][] {
-  return content
-    .split('\n')
-    .map((line) => line.trimEnd())
-    .filter((line) => line.length > 0)
-    .map((line) => line.split(','));
+/**
+ * CSV を string[][] にパースする。
+ *
+ * 集計データはスプレッドシートからのエクスポートであり、Discord 表示名などの列に
+ * カンマが入りうる。素朴な split(',') だと列が1つずれて別チームのスコアを
+ * 無言でランキングしてしまうため、クォート対応のパーサを使う。
+ */
+export function parseCSV(content: string): string[][] {
+  return parse(content, {
+    bom: true,
+    // 配信卓.csv のように末尾列が省略される行があるため、列数不一致で throw させない
+    relax_column_count: true,
+    skip_empty_lines: true,
+    trim: false,
+  }) as string[][];
 }
 
-function readCSV(filePath: string): string[][] {
+export function readCSV(filePath: string): string[][] {
   return parseCSV(readFileSync(filePath, 'utf8'));
 }
 
@@ -135,23 +137,6 @@ function loadKyukeiRows(dataDir: string): {
   };
 }
 
-function loadAggregation(dataDir: string): AggregationRow[] {
-  // 集計.csv
-  return readCSV(join(dataDir, '集計.csv'))
-    .slice(1)
-    .filter((row) => {
-      if (row.length < 8) return false;
-      if (row[4].trim() === '' || row[5].trim() === '') return false;
-      return !isNaN(Number(row[5].trim()));
-    })
-    .map((row) => ({
-      teamName: row[4].trim(),
-      scenarioNumber: Number(row[5].trim()),
-      goldenEgg: Number(row[6].trim()) || 0,
-      redEgg: Number(row[7].trim()) || 0,
-    }));
-}
-
 // ─── 整合性チェック ────────────────────────────────────────
 
 function checkIntegrity(
@@ -235,7 +220,6 @@ export function loadCsvData(bundlePath: string): CsvData {
 
   const broadcastSchedule = [...zenhanRows, ...kyukeiRows, ...kohanRows];
   const warnings = checkIntegrity(scenarioList, tableMap, zenhanRows, kohanTeams);
-  const aggregation = loadAggregation(dataDir);
 
-  return { broadcastSchedule, scenarioList: orderedScenarioList, aggregation, warnings };
+  return { broadcastSchedule, scenarioList: orderedScenarioList, warnings };
 }
